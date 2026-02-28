@@ -9,4 +9,8 @@ FastAPI backend for text analysis and AI-powered processing.
 
 ## Run locally
 
+## Run locally
+
+```bash
 uvicorn app.main:app --reload
+```
