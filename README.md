@@ -108,6 +108,37 @@ Error example:
 }
 
 ---
+### GET /analyses
+
+Returns the most recent analyses (limited to 10 by default).
+
+Response example:
+
+[
+{
+"id": 3,
+"input_text": "Hello world",
+"analysis": "Stimmung: positiv...",
+"created_at": "2026-03-02 14:21:03"
+}
+]
+
+### GET /analyses/{id}
+
+Returns a single analysis by ID.
+
+Response example:
+
+{
+"id": 3,
+"input_text": "Hello world",
+"analysis": "Stimmung: positiv...",
+"created_at": "2026-03-02 14:21:03"
+}
+
+If the ID does not exist, the API returns:
+
+Status code: 404
 
 ## Error Handling
 
