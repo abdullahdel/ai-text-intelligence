@@ -1,157 +1,164 @@
 # AI Text Intelligence
 
-AI Text Intelligence is a minimal backend application built with FastAPI that analyzes text using OpenAI's API.
+A production-ready AI-powered text analysis application built with FastAPI and OpenAI.
 
-The application:
-- Accepts text via a REST API
-- Sends the text to OpenAI for analysis
-- Returns sentiment and a short summary
-- Handles basic error cases (empty input, API errors)
+🔗 Live Demo: https://ai-text-intelligence-iiwe.onrender.com/  
+📄 API Documentation: https://ai-text-intelligence-iiwe.onrender.com/docs
 
-This project is built as part of a structured backend learning process.
+---
+
+## Overview
+
+AI Text Intelligence is a full-stack web application that analyzes text using OpenAI models and stores the results persistently in a SQLite database.
+
+The project demonstrates backend engineering fundamentals including REST API design, clean architecture, database integration, cloud deployment, and frontend-backend communication.
+
+---
+
+## Architecture
+
+The application follows a layered architecture:
+
+Client (HTML + JavaScript)  
+↓  
+FastAPI Routes (`main.py`)  
+↓  
+Service Layer (`analyzer.py`)  
+↓  
+Database Layer (`database.py`)  
+↓  
+SQLite
+
+### Design Principles
+
+- Separation of concerns
+- Service-layer architecture
+- RESTful API design
+- Environment-based configuration
+- Production-ready deployment
 
 ---
 
 ## Tech Stack
 
-- Python 3.11+
+- Python 3.11
 - FastAPI
-- Uvicorn
 - OpenAI API
-- python-dotenv
+- SQLite
+- Uvicorn
+- HTML + JavaScript (Fetch API)
+- Render (Cloud Deployment)
 
 ---
 
-## Project Structure
+## Features
 
-ai-text-intelligence/
-│
-├── app/
-│   ├── main.py
-│   ├── models.py
-│   └── services/
-│       └── analyzer.py
-│
-├── .env (not tracked)
-├── requirements.txt
-└── README.md
+- AI-powered text analysis
+- Persistent storage of analyses
+- REST API endpoints:
+    - `POST /analyze`
+    - `GET /analyses`
+    - `GET /analyses/{analysis_id}`
+- Interactive Swagger documentation
+- Cloud deployment with automatic redeploy on push
 
 ---
 
-## Setup
-
-1. Clone repository
-
-git clone <your-repo-url>
-cd ai-text-intelligence
-
-2. Create virtual environment
-
-python -m venv .venv
-source .venv/bin/activate  # Mac/Linux
-.venv\Scripts\activate     # Windows
-
-3. Install dependencies
-
-pip install -r requirements.txt
-
-4. Create `.env` file in project root
-
-OPENAI_API_KEY=your_openai_key_here
-
-5. Start server
-
-uvicorn app.main:app --reload
-
-Server runs at:
-
-http://127.0.0.1:8000
-
-Swagger documentation:
-
-http://127.0.0.1:8000/docs
-
----
-
-## API Endpoints
-
-### GET /
-
-Returns API status.
-
-Response:
-
-{
-"status": "running"
-}
-
----
+## Example API Usage
 
 ### POST /analyze
 
-Request body:
-
+Request:
+```json
 {
-"text": "Your text here"
+  "text": "Artificial intelligence is transforming software engineering."
 }
+```
 
 Response:
-
+```json
 {
-"analysis": "Stimmung: positiv. Zusammenfassung: ..."
+  "analysis": "The text discusses the impact of AI on software development..."
 }
-
-Error example:
-
-{
-"error": "Text darf nicht leer sein."
-}
-
----
-### GET /analyses
-
-Returns the most recent analyses (limited to 10 by default).
-
-Response example:
-
-[
-{
-"id": 3,
-"input_text": "Hello world",
-"analysis": "Stimmung: positiv...",
-"created_at": "2026-03-02 14:21:03"
-}
-]
-
-### GET /analyses/{id}
-
-Returns a single analysis by ID.
-
-Response example:
-
-{
-"id": 3,
-"input_text": "Hello world",
-"analysis": "Stimmung: positiv...",
-"created_at": "2026-03-02 14:21:03"
-}
-
-If the ID does not exist, the API returns:
-
-Status code: 404
-
-## Error Handling
-
-The application handles:
-- Empty input validation
-- OpenAI API errors (try/except)
-- Environment variable loading
+```
 
 ---
 
-## Future Improvements
+## Local Setup
 
-- Database integration (SQLite)
-- Request history endpoint
-- Async implementation
-- Deployment (Render / Railway)
+Clone the repository:
+
+```bash
+git clone https://github.com/abdullahdel/ai-text-intelligence.git
+cd ai-text-intelligence
+```
+
+Create virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+Activate environment:
+
+Windows:
+```bash
+.venv\Scripts\activate
+```
+
+macOS / Linux:
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Create a `.env` file in the project root:
+
+```
+OPENAI_API_KEY=your_api_key_here
+```
+
+Run locally:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+---
+
+## Deployment
+
+The application is deployed on Render with:
+
+- Environment variable configuration
+- Production start command
+- Automatic rebuild on push to `master`
+
+Live URL:
+https://ai-text-intelligence-iiwe.onrender.com/
+
+---
+
+## What This Project Demonstrates
+
+This project showcases:
+
+- Backend API development with FastAPI
+- Integration of external AI services
+- Database persistence
+- Clean project structure
+- Cloud deployment workflow
+- Debugging production issues (CORS, deployment, environment variables)
+
+---
+
+## Author
+
+**Abdullah Talal**  
+Informatics Student – LMU Munich  
+Focus: Backend Engineering & AI Systems
