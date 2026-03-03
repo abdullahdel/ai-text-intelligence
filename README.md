@@ -1,9 +1,17 @@
 # AI Text Intelligence
 
-A production-ready AI-powered text analysis application built with FastAPI and OpenAI.
+A production-ready AI-powered text analysis application built with FastAPI, OpenAI, and deployed to the cloud.
+
+This project focuses on backend architecture, API design, real-world deployment, and frontend-backend integration.
 
 🔗 Live Demo: https://ai-text-intelligence-iiwe.onrender.com/  
 📄 API Documentation: https://ai-text-intelligence-iiwe.onrender.com/docs
+
+---
+
+## Preview
+
+![Application Screenshot](screenshot.png)
 
 ---
 
@@ -11,13 +19,13 @@ A production-ready AI-powered text analysis application built with FastAPI and O
 
 AI Text Intelligence is a full-stack web application that analyzes text using OpenAI models and stores the results persistently in a SQLite database.
 
-The project demonstrates backend engineering fundamentals including REST API design, clean architecture, database integration, cloud deployment, and frontend-backend communication.
+The project demonstrates practical backend engineering skills including REST API design, service-layer architecture, database integration, cloud deployment, and debugging production issues.
 
 ---
 
 ## Architecture
 
-The application follows a layered architecture:
+The application follows a clean layered structure:
 
 Client (HTML + JavaScript)  
 ↓  
@@ -35,7 +43,7 @@ SQLite
 - Service-layer architecture
 - RESTful API design
 - Environment-based configuration
-- Production-ready deployment
+- Production deployment setup
 
 ---
 
@@ -56,9 +64,9 @@ SQLite
 - AI-powered text analysis
 - Persistent storage of analyses
 - REST API endpoints:
-    - `POST /analyze`
-    - `GET /analyses`
-    - `GET /analyses/{analysis_id}`
+  - `POST /analyze`
+  - `GET /analyses`
+  - `GET /analyses/{analysis_id}`
 - Interactive Swagger documentation
 - Cloud deployment with automatic redeploy on push
 
@@ -69,6 +77,7 @@ SQLite
 ### POST /analyze
 
 Request:
+
 ```json
 {
   "text": "Artificial intelligence is transforming software engineering."
@@ -76,6 +85,7 @@ Request:
 ```
 
 Response:
+
 ```json
 {
   "analysis": "The text discusses the impact of AI on software development..."
@@ -138,22 +148,35 @@ The application is deployed on Render with:
 - Environment variable configuration
 - Production start command
 - Automatic rebuild on push to `master`
+- Debugged production issues (dependency mismatches, URL configuration, CORS behavior)
 
-Live URL:
+Live URL:  
 https://ai-text-intelligence-iiwe.onrender.com/
 
 ---
 
-## What This Project Demonstrates
+## Engineering Reflection
 
-This project showcases:
+During development and deployment, several real-world challenges were addressed:
+
+- Resolving production URL mismatches between local and cloud environments
+- Debugging failed deployments due to missing dependencies
+- Managing environment variables securely in production
+- Handling frontend-backend communication over HTTPS
+- Understanding and resolving build pipeline issues
+
+This project reflects hands-on backend engineering experience beyond tutorial-level implementation.
+
+---
+
+## What This Project Demonstrates
 
 - Backend API development with FastAPI
 - Integration of external AI services
 - Database persistence
 - Clean project structure
 - Cloud deployment workflow
-- Debugging production issues (CORS, deployment, environment variables)
+- Production debugging and problem-solving
 
 ---
 
