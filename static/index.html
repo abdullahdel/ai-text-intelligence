@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Text Intelligence</title>
+</head>
+<body>
+
+<h1>AI Text Intelligence</h1>
+
+<textarea id="inputText" rows="6" cols="60" placeholder="Enter text..."></textarea>
+<br><br>
+
+<button onclick="analyzeText()">Analyze</button>
+
+<h2>Result:</h2>
+<pre id="result"></pre>
+
+<script>
+    async function analyzeText() {
+        const text = document.getElementById("inputText").value;
+        const resultElement = document.getElementById("result");
+
+        resultElement.textContent = "Loading...";
+
+        try {
+            const response = await fetch("http://127.0.0.1:8000/analyze", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ text: text })
+            });
+
+            if (!response.ok) {
+                throw new Error("HTTP error " + response.status);
+            }
+
+            const data = await response.json();
+
+            resultElement.textContent = JSON.stringify(data, null, 2);
+
+        } catch (error) {
+            resultElement.textContent = "Error: " + error.message;
+        }
+    }
+</script>
+
+</body>
+</html>

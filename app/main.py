@@ -4,6 +4,8 @@ from app.services.analyzer import analyze_text
 from contextlib import asynccontextmanager
 from app.database import init_db, save_analysis, get_all_analyses, get_analysis_by_id
 from fastapi import HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 
 @asynccontextmanager
@@ -12,10 +14,7 @@ async def lifespan(application: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
-
-@app.get("/")
-def root():
-    return{"status":"running"}
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.post("/analyze")
 def analyze(request: TestRequest):
@@ -39,4 +38,8 @@ def get_analysis(analysis_id: int):
     if result is None:
         raise HTTPException(status_code=404, detail="Analyse nicht gefunden")
     return result
+
+@app.get("/")
+def serve_index():
+    return FileResponse("static/index.html")
 
