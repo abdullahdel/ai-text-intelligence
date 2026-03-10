@@ -1,18 +1,14 @@
 import psycopg2
 from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 DB_PATH = DATA_DIR / "app.db"
 
 def get_connection():
-    return psycopg2.connect(
-        dbname="ai_text_intelligence",
-        user="postgres",
-        password="abidulli2004",
-        host="postgresql://ai_text_intelligence_user:r7xRhIS6G5jS0xWQkFmZmzbZM1VQrkaf@dpg-d6o344paae7s73brce1g-a/ai_text_intelligence",
-        port="1234"
-    )
+    database_url = os.getenv("DATABASE_URL")
+    return psycopg2.connect(database_url)
 
 def init_db():
     DATA_DIR.mkdir(exist_ok=True)
