@@ -10,7 +10,7 @@ def get_connection():
         dbname="ai_text_intelligence",
         user="postgres",
         password="abidulli2004",
-        host="localhost",
+        host="postgresql://ai_text_intelligence_user:r7xRhIS6G5jS0xWQkFmZmzbZM1VQrkaf@dpg-d6o344paae7s73brce1g-a/ai_text_intelligence",
         port="1234"
     )
 
