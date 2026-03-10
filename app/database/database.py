@@ -1,21 +1,30 @@
-import sqlite3
+import psycopg2
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 DB_PATH = DATA_DIR / "app.db"
 
+def get_connection():
+    return psycopg2.connect(
+        dbname="ai_text_intelligence",
+        user="postgres",
+        password="abidulli2004",
+        host="localhost",
+        port="1234"
+    )
+
 def init_db():
     DATA_DIR.mkdir(exist_ok=True)
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS analyses (
-                                                           id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                                           input_text TEXT NOT NULL,
-                                                           analysis TEXT NOT NULL,
+                                                           id SERIAL PRIMARY KEY,
+                                                           text TEXT,
+                                                           analysis TEXT,
                                                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                    )
                    """)
@@ -24,26 +33,27 @@ def init_db():
     conn.close()
 
 def save_analysis(input_text:str, analysis:str):
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-                   INSERT INTO analyses (input_text, analysis)
-                   VALUES (?, ?)
+                   INSERT INTO analyses (text, analysis)
+                   VALUES (%s, %s)
                    """, (input_text, analysis))
 
     conn.commit()
     conn.close()
 
 def get_all_analyses(limit: int = 10):
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-                   SELECT * FROM analyses 
+                   SELECT id, text, analysis, created_at
+                   FROM analyses
                    ORDER BY created_at DESC
-                   LIMIT ?
-                   """,(limit,))
+                       LIMIT %s
+                   """, (limit,))
 
     rows = cursor.fetchall()
     analyses = []
@@ -58,13 +68,14 @@ def get_all_analyses(limit: int = 10):
     conn.close()
     return analyses
 
-def get_analysis_by_id(id: int):
-    conn = sqlite3.connect(DB_PATH)
+def get_analysis_by_id(analysis_id: int):
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-                   SELECT * FROM analyses 
-                   WHERE id = ?
-                       """,(id,))
+                   SELECT id, text, analysis, created_at
+                   FROM analyses
+                   WHERE id = %s
+                   """, (analysis_id,))
 
     row = cursor.fetchone()
     conn.close()
