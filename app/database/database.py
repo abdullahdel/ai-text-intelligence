@@ -87,7 +87,7 @@ def get_all_analyses(limit: int = 10, offset: int = 0):
             "id": row[0],
             "input_text": row[1],
             "analysis": row[2],
-            "created_at": row[3]
+            "created_at": row[3].isoformat()
         })
 
     return analyses
@@ -117,6 +117,6 @@ def get_analysis_by_id(analysis_id: int):
         "id": row[0],
         "input_text": row[1],
         "analysis": row[2],
-        "created_at": row[3]
+        "created_at": row[3].isoformat()
     }
 
