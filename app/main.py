@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.models.models import TestRequest
+from app.models.models import TestRequest, AnalysisItem, AnalysisResponse
 from app.services.analyzer import analyze_text
 from contextlib import asynccontextmanager
 from app.database.database import init_db, save_analysis, get_all_analyses, get_analysis_by_id, init_pool
@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.utils.logger import logger
 from app.utils.error_handler import global_exception_handler
+from typing import List
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
@@ -22,7 +23,7 @@ app.add_exception_handler(Exception, global_exception_handler)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-@app.post("/analyze")
+@app.post("/analyze", response_model=AnalysisResponse)
 def analyze(request: TestRequest):
 
     logger.info(f"Received analysis request (text length {len(request.text)})")
@@ -36,7 +37,7 @@ def analyze(request: TestRequest):
     return result
 
 
-@app.get("/analyses")
+@app.get("/analyses", response_model=List[AnalysisItem])
 def get_analyses():
 
     logger.info("Fetching analyses list")
@@ -44,7 +45,7 @@ def get_analyses():
     return get_all_analyses()
 
 
-@app.get("/analyses/{analysis_id}")
+@app.get("/analyses/{analysis_id}", response_model=AnalysisItem)
 def get_analysis(analysis_id: int):
 
     logger.info(f"Fetching analysis with id {analysis_id}")
