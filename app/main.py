@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse
 from app.utils.logger import logger
 from app.utils.error_handler import global_exception_handler
 from typing import List
+from fastapi import Query
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
@@ -38,11 +39,15 @@ def analyze(request: TestRequest):
 
 
 @app.get("/analyses", response_model=List[AnalysisItem])
-def get_analyses():
+def get_analyses(
+        limit: int = Query(default=10, ge=1, le=100),
+        offset: int = Query(default=0, ge=0)
+):
 
     logger.info("Fetching analyses list")
 
-    return get_all_analyses()
+    result = get_all_analyses(limit,offset)
+    return result
 
 
 @app.get("/analyses/{analysis_id}", response_model=AnalysisItem)

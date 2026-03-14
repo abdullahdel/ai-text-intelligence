@@ -61,7 +61,7 @@ def save_analysis(input_text:str, analysis:str):
             release_connection(conn)
 
 
-def get_all_analyses(limit: int = 10):
+def get_all_analyses(limit: int = 10, offset: int = 0):
     conn = None
     try:
             conn = get_connection()
@@ -71,8 +71,9 @@ def get_all_analyses(limit: int = 10):
                                SELECT id, text, analysis, created_at
                                FROM analyses
                                ORDER BY created_at DESC
-                                   LIMIT %s
-                               """, (limit,))
+                                LIMIT %s
+                                Offset %s
+                               """, (limit,offset))
 
                 rows = cursor.fetchall()
     finally:
