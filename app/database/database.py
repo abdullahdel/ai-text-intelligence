@@ -2,6 +2,8 @@ import psycopg2
 from dotenv import load_dotenv
 import os
 from psycopg2 import pool
+from app.utils.logger import logger
+
 
 connection_pool: pool.SimpleConnectionPool | None = None
 
@@ -12,6 +14,7 @@ def init_db():
             conn = get_connection()
 
             with conn.cursor() as cursor:
+                logger.info("creating database table")
                 cursor.execute("""
                                CREATE TABLE IF NOT EXISTS analyses (
                                                                        id SERIAL PRIMARY KEY,
@@ -47,6 +50,7 @@ def save_analysis(input_text:str, analysis:str):
     try:
             conn = get_connection()
             with conn.cursor() as cursor:
+                logger.info("Saving analysis to database")
                 cursor.execute("""
                                INSERT INTO analyses (text, analysis)
                                VALUES (%s, %s)
@@ -62,6 +66,7 @@ def get_all_analyses(limit: int = 10):
     try:
             conn = get_connection()
             with conn.cursor() as cursor:
+                logger.info("Fetching analyses from database")
                 cursor.execute("""
                                SELECT id, text, analysis, created_at
                                FROM analyses
@@ -92,6 +97,7 @@ def get_analysis_by_id(analysis_id: int):
     try:
             conn = get_connection()
             with conn.cursor() as cursor:
+                logger.info("query analyses by id from database")
                 cursor.execute("""
                                SELECT id, text, analysis, created_at
                                FROM analyses
