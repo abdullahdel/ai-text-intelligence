@@ -120,3 +120,19 @@ def get_analysis_by_id(analysis_id: int):
         "created_at": row[3].isoformat()
     }
 
+def delete_analysis(analysis_id: int):
+    conn = None
+    try:
+        logger.info("Deleting analysis from database")
+        conn = get_connection()
+        with conn.cursor as cursor:
+            cursor.execute("""
+                DELETE FROM analyses
+                WHERE id = %s
+            """,(analysis_id,))
+
+        conn.commit()
+
+    finally:
+        if conn:
+            release_connection(conn)
