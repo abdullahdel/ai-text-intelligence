@@ -55,7 +55,6 @@
         }
 
     </style>
-
 </head>
 
 <body>
@@ -86,6 +85,11 @@
 
         <button onclick="loadAnalyses()">Reload History</button>
 
+        <br><br>
+
+        <button onclick="previousPage()">Previous</button>
+        <button onclick="nextPage()">Next</button>
+
         <ul id="analysis-list"></ul>
 
     </div>
@@ -94,16 +98,19 @@
 
 <script>
 
+    let limit = 5
+    let offset = 0
+
     async function analyzeText(){
 
-        const text=document.getElementById("inputText").value
-        const resultElement=document.getElementById("result")
+        const text = document.getElementById("inputText").value
+        const resultElement = document.getElementById("result")
 
-        resultElement.textContent="Analyzing..."
+        resultElement.textContent = "Analyzing..."
 
         try{
 
-            const response=await fetch("/analyze",{
+            const response = await fetch("/analyze",{
                 method:"POST",
                 headers:{
                     "Content-Type":"application/json"
@@ -111,15 +118,15 @@
                 body:JSON.stringify({text:text})
             })
 
-            const data=await response.json()
+            const data = await response.json()
 
-            resultElement.textContent=JSON.stringify(data,null,2)
+            resultElement.textContent = JSON.stringify(data,null,2)
 
             loadAnalyses()
 
         }catch(error){
 
-            resultElement.textContent="Error: "+error.message
+            resultElement.textContent = "Error: " + error.message
 
         }
 
@@ -127,21 +134,21 @@
 
     async function loadAnalyses(){
 
-        const response=await fetch("/analyses")
+        const response = await fetch(`/analyses?limit=${limit}&offset=${offset}`)
 
-        const analyses=await response.json()
+        const analyses = await response.json()
 
-        const list=document.getElementById("analysis-list")
+        const list = document.getElementById("analysis-list")
 
-        list.innerHTML=""
+        list.innerHTML = ""
 
-        analyses.forEach(item=>{
+        analyses.forEach(item => {
 
-            const li=document.createElement("li")
+            const li = document.createElement("li")
 
-            li.textContent=item.input_text
+            li.textContent = item.input_text + " → " + item.analysis
 
-            li.onclick=()=>loadAnalysisDetail(item.id)
+            li.onclick = () => loadAnalysisDetail(item.id)
 
             list.appendChild(li)
 
@@ -149,21 +156,38 @@
 
     }
 
-    async function loadAnalysisDetail(id){
+    function nextPage(){
 
-        const resultElement=document.getElementById("result")
-
-        resultElement.textContent="Loading..."
-
-        const response=await fetch(`/analyses/${id}`)
-
-        const data=await response.json()
-
-        resultElement.textContent=JSON.stringify(data,null,2)
+        offset += limit
+        loadAnalyses()
 
     }
 
-    window.onload=loadAnalyses
+    function previousPage(){
+
+        if(offset >= limit){
+            offset -= limit
+        }
+
+        loadAnalyses()
+
+    }
+
+    async function loadAnalysisDetail(id){
+
+        const resultElement = document.getElementById("result")
+
+        resultElement.textContent = "Loading..."
+
+        const response = await fetch(`/analyses/${id}`)
+
+        const data = await response.json()
+
+        resultElement.textContent = JSON.stringify(data,null,2)
+
+    }
+
+    window.onload = loadAnalyses
 
 </script>
 
