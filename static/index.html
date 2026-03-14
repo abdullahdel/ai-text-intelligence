@@ -2,47 +2,169 @@
 <html>
 <head>
     <title>AI Text Intelligence</title>
+
+    <style>
+
+        body{
+            font-family: Arial, sans-serif;
+            margin:40px;
+        }
+
+        .container{
+            display:flex;
+            gap:40px;
+        }
+
+        .left{
+            width:50%;
+        }
+
+        .right{
+            width:40%;
+        }
+
+        textarea{
+            width:100%;
+            font-size:16px;
+        }
+
+        button{
+            padding:10px 20px;
+            font-size:16px;
+            cursor:pointer;
+        }
+
+        ul{
+            list-style:none;
+            padding:0;
+        }
+
+        li{
+            padding:8px;
+            border-bottom:1px solid #ddd;
+            cursor:pointer;
+        }
+
+        li:hover{
+            background:#f3f3f3;
+        }
+
+        pre{
+            background:#f6f6f6;
+            padding:15px;
+        }
+
+    </style>
+
 </head>
+
 <body>
 
 <h1>AI Text Intelligence</h1>
 
-<textarea id="inputText" rows="6" cols="60" placeholder="Enter text..."></textarea>
-<br><br>
+<div class="container">
 
-<button onclick="analyzeText()">Analyze</button>
+    <div class="left">
 
-<h2>Result:</h2>
-<pre id="result"></pre>
+        <h2>Text Analyse</h2>
+
+        <textarea id="inputText" rows="8" placeholder="Enter text..."></textarea>
+
+        <br><br>
+
+        <button onclick="analyzeText()">Analyze</button>
+
+        <h3>Result</h3>
+
+        <pre id="result">No analysis yet</pre>
+
+    </div>
+
+    <div class="right">
+
+        <h2>Analyse History</h2>
+
+        <button onclick="loadAnalyses()">Reload History</button>
+
+        <ul id="analysis-list"></ul>
+
+    </div>
+
+</div>
 
 <script>
-    async function analyzeText() {
-        const text = document.getElementById("inputText").value;
-        const resultElement = document.getElementById("result");
 
-        resultElement.textContent = "Loading...";
+    async function analyzeText(){
 
-        try {
-            const response = await fetch("/analyze", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
+        const text=document.getElementById("inputText").value
+        const resultElement=document.getElementById("result")
+
+        resultElement.textContent="Analyzing..."
+
+        try{
+
+            const response=await fetch("/analyze",{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
                 },
-                body: JSON.stringify({ text: text })
-            });
+                body:JSON.stringify({text:text})
+            })
 
-            if (!response.ok) {
-                throw new Error("HTTP error " + response.status);
-            }
+            const data=await response.json()
 
-            const data = await response.json();
+            resultElement.textContent=JSON.stringify(data,null,2)
 
-            resultElement.textContent = JSON.stringify(data, null, 2);
+            loadAnalyses()
 
-        } catch (error) {
-            resultElement.textContent = "Error: " + error.message;
+        }catch(error){
+
+            resultElement.textContent="Error: "+error.message
+
         }
+
     }
+
+    async function loadAnalyses(){
+
+        const response=await fetch("/analyses")
+
+        const analyses=await response.json()
+
+        const list=document.getElementById("analysis-list")
+
+        list.innerHTML=""
+
+        analyses.forEach(item=>{
+
+            const li=document.createElement("li")
+
+            li.textContent=item.input_text
+
+            li.onclick=()=>loadAnalysisDetail(item.id)
+
+            list.appendChild(li)
+
+        })
+
+    }
+
+    async function loadAnalysisDetail(id){
+
+        const resultElement=document.getElementById("result")
+
+        resultElement.textContent="Loading..."
+
+        const response=await fetch(`/analyses/${id}`)
+
+        const data=await response.json()
+
+        resultElement.textContent=JSON.stringify(data,null,2)
+
+    }
+
+    window.onload=loadAnalyses
+
 </script>
 
 </body>
