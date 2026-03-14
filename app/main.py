@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.utils.logger import logger
-
+from app.utils.error_handler import global_exception_handler
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
@@ -18,6 +18,7 @@ async def lifespan(application: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.add_exception_handler(Exception, global_exception_handler)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
