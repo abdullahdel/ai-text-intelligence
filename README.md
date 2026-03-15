@@ -1,26 +1,33 @@
 # AI Text Intelligence
 
-AI Text Intelligence is a fullstack application that analyzes user-provided text using an AI model and stores the results in a database.  
-The project demonstrates a production-style backend built with FastAPI and PostgreSQL, integrated with the OpenAI API.
+AI Text Intelligence is a fullstack web application for AI-powered text analysis.
 
-The application allows users to submit text for analysis, stores the results, and provides a history view of previous analyses through a REST API and a simple frontend interface.
+Users can submit text through a simple web interface, the backend processes the request using the OpenAI API, stores the generated result in PostgreSQL, and exposes previous analyses through a REST API and a history view.
+
+The project was built to demonstrate production-oriented backend concepts such as layered architecture, database persistence, connection pooling, structured logging, centralized error handling, and request/response validation with FastAPI and Pydantic.
+
+---
+
+## Screenshot
+
+![Application Screenshot](screenshot.png)
 
 ---
 
 ## Features
 
-- AI-powered text sentiment and summary analysis
-- Integration of OpenAI API for natural language processing
+- AI-powered text analysis using the OpenAI API
+- Fullstack web application with a simple frontend interface
 - REST API built with FastAPI
 - PostgreSQL database for persistent storage
-- Database connection pooling
-- Pagination support for analysis history
-- Response validation with Pydantic
+- Database connection pooling with `psycopg2.pool.SimpleConnectionPool`
+- Request and response validation with Pydantic
+- Pagination support for analysis history using `limit` and `offset`
 - Centralized error handling
-- Structured logging
-- Interactive frontend built with HTML, CSS and JavaScript
-- Clickable analysis history
-- Detail view for previous analyses
+- Structured logging across API, service, and database layers
+- Clickable history view for previous analyses
+- Detail view for individual analyses
+- Deployment on Render
 
 ---
 
@@ -31,6 +38,7 @@ The application allows users to submit text for analysis, stores the results, an
 - FastAPI
 - PostgreSQL
 - psycopg2
+- Pydantic
 - OpenAI API
 
 ### Frontend
@@ -39,100 +47,181 @@ The application allows users to submit text for analysis, stores the results, an
 - JavaScript
 - Fetch API
 
+### Deployment
+- Render
+
 ---
 
 ## Architecture
 
-The project follows a layered backend architecture:
+The backend follows a layered architecture:
 
-API Layer (FastAPI Endpoints)  
-↓  
-Service Logic  
-↓  
-Database Layer  
-↓  
-PostgreSQL
+- **API layer** for request handling and endpoint definitions
+- **Service layer** for analysis logic and OpenAI integration
+- **Database layer** for persistence and retrieval
+- **PostgreSQL** as the persistent storage layer
 
-Key architectural concepts implemented:
+### Core backend concepts demonstrated in this project
 
-- REST API design
-- Response validation
-- Structured logging
+- REST API design with FastAPI
+- Request and response validation with Pydantic
+- PostgreSQL persistence
 - Connection pooling
-- Centralized error handling
-- Pagination for API endpoints
+- Structured logging
+- Centralized exception handling
+- Pagination with `limit` and `offset`
+
+---
+
+## Project Structure
+
+```text
+ai-text-intelligence/
+├── app/
+│   ├── api/
+│   ├── data/
+│   ├── database/
+│   │   └── database.py
+│   ├── models/
+│   │   └── models.py
+│   ├── schemas/
+│   ├── services/
+│   │   └── analyzer.py
+│   ├── utils/
+│   │   ├── error_handler.py
+│   │   └── logger.py
+│   └── main.py
+├── data/
+├── static/
+│   └── index.html
+├── .gitignore
+├── README.md
+├── requirements.txt
+├── runtime.txt
+└── screenshot.png
+```
 
 ---
 
 ## API Endpoints
 
-### Analyze text
+### `POST /analyze`
 
-POST /analyze
+Analyzes user-provided text using the OpenAI API and stores the result in the database.
 
-Request
-
+#### Request
+```json
 {
-"text": "Your text here"
+  "text": "Your text here"
 }
+```
 
-Response
-
+#### Example Response
+```json
 {
-"analysis": "Sentiment: positive. Summary: ..."
+  "analysis": "Generated analysis result"
 }
+```
 
 ---
 
-### Get analysis history
+### `GET /analyses`
 
-GET /analyses
+Returns previously stored analyses with pagination support.
 
-Supports pagination:
-
+#### Example
+```http
 GET /analyses?limit=5&offset=0
+```
 
 ---
 
-### Get single analysis
+### `GET /analyses/{id}`
 
-GET /analyses/{id}
+Returns a single analysis entry by its ID.
+
+#### Example
+```http
+GET /analyses/1
+```
 
 ---
 
-## Screenshot
+## Environment Variables
 
-![Application Screenshot](screenshot.png)
+Create a `.env` file in the project root and define the following variables:
+
+```env
+OPENAI_API_KEY=your_openai_api_key
+DATABASE_URL=your_postgresql_connection_string
+```
 
 ---
 
-## Run locally
+## Run Locally
 
-Clone repository
+### 1. Clone the repository
 
-git clone https://github.com/abdullahdel/ai-text-intelligence
+```bash
+git clone https://github.com/abdullahdel/ai-text-intelligence.git
+cd ai-text-intelligence
+```
 
-Install dependencies
+### 2. Install dependencies
 
+```bash
 pip install -r requirements.txt
+```
 
-Run server
+### 3. Configure environment variables
 
+Create a `.env` file in the project root and add:
+
+```env
+OPENAI_API_KEY=your_openai_api_key
+DATABASE_URL=your_postgresql_connection_string
+```
+
+### 4. Start the application
+
+```bash
 uvicorn app.main:app --reload
+```
 
-Open browser
+### 5. Open the application
 
+```text
 http://127.0.0.1:8000
+```
 
 ---
 
-## Live Demo
+## Live Deployment
 
+The project is deployed on Render:
+
+**Live API / Demo:**  
 https://ai-text-intelligence-api.onrender.com
+
+---
+
+## What This Project Demonstrates
+
+This project was built to demonstrate practical backend engineering skills, including:
+
+- API design and implementation
+- AI API integration
+- Database design and persistence
+- Connection pooling
+- Logging and debugging
+- Error handling
+- Pagination
+- Layered project structure
+- Deployment of a fullstack application
 
 ---
 
 ## Author
 
-Abdullah Talal  
-LMU Munich – Computer Science
+**Abdullah Talal**  
+B.Sc. Computer Science, LMU Munich
