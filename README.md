@@ -92,7 +92,9 @@ ai-text-intelligence/
 │   └── main.py
 ├── static/
 │   └── index.html
+├── .dockerignore
 ├── .gitignore
+├── Dockerfile
 ├── README.md
 ├── requirements.txt
 ├── runtime.txt
@@ -229,6 +231,29 @@ uvicorn app.main:app --reload
 ```text
 http://127.0.0.1:8000
 ```
+---
+
+## Docker Support
+
+The project also includes Docker support for a containerized local setup.
+
+### Build the image
+
+```bash
+docker build -t ai-text-intelligence .
+```
+
+### Run the container
+
+```powershell
+docker run -p 8000:8000 -e OPENAI_API_KEY="your_openai_api_key" -e DATABASE_URL="your_postgresql_connection_string" ai-text-intelligence
+```
+
+Then open:
+
+```text
+http://localhost:8000
+```
 
 ---
 
@@ -256,6 +281,7 @@ This project was built to demonstrate practical backend engineering skills, incl
 - delete operations
 - layered backend architecture
 - deployment of a fullstack application
+- - containerized local setup with Docker
 
 ---
 
