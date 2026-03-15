@@ -2,9 +2,9 @@
 
 AI Text Intelligence is a fullstack web application for AI-powered text analysis.
 
-Users can submit text through a simple web interface, the backend processes the request using the OpenAI API, stores the generated result in PostgreSQL, and exposes previous analyses through a REST API and a history view.
+Users can submit text through a simple web interface, the backend processes the request using the OpenAI API, stores the generated result in PostgreSQL, and provides access to previous analyses through a REST API and a history view.
 
-The project was built to demonstrate production-oriented backend concepts such as layered architecture, database persistence, connection pooling, structured logging, centralized error handling, and request/response validation with FastAPI and Pydantic.
+The project was built to demonstrate production-oriented backend concepts such as layered architecture, database persistence, connection pooling, structured logging, centralized error handling, request/response validation with FastAPI and Pydantic, and deployment of a fullstack application.
 
 ---
 
@@ -18,6 +18,7 @@ The project was built to demonstrate production-oriented backend concepts such a
 
 - AI-powered text analysis using the OpenAI API
 - Fullstack web application with a simple frontend interface
+- Frontend served directly by FastAPI
 - REST API built with FastAPI
 - PostgreSQL database for persistent storage
 - Database connection pooling with `psycopg2.pool.SimpleConnectionPool`
@@ -27,6 +28,7 @@ The project was built to demonstrate production-oriented backend concepts such a
 - Structured logging across API, service, and database layers
 - Clickable history view for previous analyses
 - Detail view for individual analyses
+- Delete functionality for stored analyses
 - Deployment on Render
 
 ---
@@ -78,20 +80,16 @@ The backend follows a layered architecture:
 ```text
 ai-text-intelligence/
 ├── app/
-│   ├── api/
-│   ├── data/
 │   ├── database/
 │   │   └── database.py
 │   ├── models/
 │   │   └── models.py
-│   ├── schemas/
 │   ├── services/
 │   │   └── analyzer.py
 │   ├── utils/
 │   │   ├── error_handler.py
 │   │   └── logger.py
 │   └── main.py
-├── data/
 ├── static/
 │   └── index.html
 ├── .gitignore
@@ -104,6 +102,12 @@ ai-text-intelligence/
 ---
 
 ## API Endpoints
+
+### `GET /`
+
+Serves the frontend UI.
+
+---
 
 ### `POST /analyze`
 
@@ -144,6 +148,38 @@ Returns a single analysis entry by its ID.
 ```http
 GET /analyses/1
 ```
+
+---
+
+### `DELETE /analyses/{id}`
+
+Deletes a stored analysis entry by its ID.
+
+#### Example
+```http
+DELETE /analyses/1
+```
+
+#### Example Response
+```json
+{
+  "message": "Analysis deleted"
+}
+```
+
+---
+
+## Frontend Functionality
+
+The frontend provides:
+
+- text input for submitting analyses
+- result display area
+- analysis history list
+- clickable detail view for previous analyses
+- pagination with **Previous** and **Next**
+- delete button for removing stored analyses
+- reload button for refreshing history
 
 ---
 
@@ -211,13 +247,15 @@ This project was built to demonstrate practical backend engineering skills, incl
 
 - API design and implementation
 - AI API integration
-- Database design and persistence
-- Connection pooling
-- Logging and debugging
-- Error handling
-- Pagination
-- Layered project structure
-- Deployment of a fullstack application
+- database persistence with PostgreSQL
+- connection pooling
+- structured logging
+- centralized error handling
+- request and response validation
+- pagination
+- delete operations
+- layered backend architecture
+- deployment of a fullstack application
 
 ---
 

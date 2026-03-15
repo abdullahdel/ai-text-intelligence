@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from app.utils.logger import logger
 from app.utils.error_handler import global_exception_handler
 from typing import List
-from fastapi import Query
+from fastapi import Query, HTTPException
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
@@ -31,9 +31,11 @@ def analyze(request: TestRequest):
 
     result = analyze_text(request.text)
 
-    if "analysis" in result:
-        save_analysis(request.text, result["analysis"])
-        logger.info("Analysis stored in database")
+    if "error" in result:
+        raise HTTPException(status_code= 400, detail=result["error"])
+
+    save_analysis(request.text, result["analysis"])
+    logger.info("Analysis stored in database")
 
     return result
 

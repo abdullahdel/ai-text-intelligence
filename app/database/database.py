@@ -125,7 +125,7 @@ def delete_analysis(analysis_id: int):
     try:
         logger.info("Deleting analysis from database")
         conn = get_connection()
-        with conn.cursor as cursor:
+        with conn.cursor() as cursor:
             cursor.execute("""
                 DELETE FROM analyses
                 WHERE id = %s
