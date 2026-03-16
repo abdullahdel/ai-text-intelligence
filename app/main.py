@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import List
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -35,6 +35,24 @@ def analyze(request: TestRequest):
     logger.info(f"Received analysis request (text length {len(request.text)})")
     return create_analysis(request.text)
 
+@app.post("/upload-analyze", response_model=AnalysisResponse)
+def upload_analyze(file:UploadFile=File(...)):
+    logger.info(f"Received file upload request: {file.filename}")
+
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Keine Datei hochgeladen.")
+
+    if not file.filename.endswith(".txt"):
+        raise HTTPException(status_code=400, detail="Nur .txt-Dateien sind erlaubt.")
+
+    try:
+        content = file.file.read()
+        text = content.decode("utf-8")
+    except UnicodeDecodeError:
+        raise HTTPException(status_code=400, detail="Datei konnte nicht als UTF-8 Text gelesen werden.")
+
+    return create_analysis(text)
+
 
 @app.get("/analyses", response_model=List[AnalysisItem])
 def get_analyses(
@@ -61,3 +79,4 @@ def delete_analysis_endpoint(analysis_id: int):
 def serve_index():
     logger.info("Serving frontend UI")
     return FileResponse("static/index.html")
+

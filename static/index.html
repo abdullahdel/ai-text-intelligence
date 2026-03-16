@@ -1,213 +1,447 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Text Intelligence</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
 
-        body{
+        body {
+            margin: 0;
             font-family: Arial, sans-serif;
-            margin:40px;
+            background: #0f1117;
+            color: #f5f7fb;
         }
 
-        .container{
-            display:flex;
-            gap:40px;
+        .page {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 24px 40px;
         }
 
-        .left{
-            width:50%;
+        h1 {
+            margin: 0 0 28px;
+            font-size: 42px;
+            font-weight: 700;
         }
 
-        .right{
-            width:40%;
+        h2 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            font-size: 28px;
         }
 
-        textarea{
-            width:100%;
-            font-size:16px;
+        h3 {
+            margin-top: 0;
+            margin-bottom: 14px;
+            font-size: 22px;
         }
 
-        button{
-            padding:10px 20px;
-            font-size:16px;
-            cursor:pointer;
+        .container {
+            display: grid;
+            grid-template-columns: 1.3fr 0.9fr;
+            gap: 28px;
+            align-items: start;
         }
 
-        ul{
-            list-style:none;
-            padding:0;
+        .panel {
+            background: #161b22;
+            border: 1px solid #2b3240;
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
         }
 
-        li{
-            padding:8px;
-            border-bottom:1px solid #ddd;
-            cursor:pointer;
+        .section {
+            margin-bottom: 28px;
         }
 
-        li:hover{
-            background:#f3f3f3;
+        textarea {
+            width: 100%;
+            min-height: 190px;
+            resize: vertical;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #3b4558;
+            background: #1d2330;
+            color: #f5f7fb;
+            font-size: 16px;
+            outline: none;
         }
 
-        pre{
-            background:#f6f6f6;
-            padding:15px;
+        textarea::placeholder {
+            color: #9aa4b5;
         }
 
+        input[type="file"] {
+            display: block;
+            margin-bottom: 14px;
+            color: #f5f7fb;
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        button {
+            padding: 11px 18px;
+            font-size: 15px;
+            border-radius: 10px;
+            border: 1px solid #4d5b75;
+            background: #232b39;
+            color: #f5f7fb;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        button:hover {
+            background: #2f394b;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .result-box {
+            background: #11161d;
+            border: 1px solid #2b3240;
+            border-radius: 12px;
+            padding: 16px;
+            min-height: 220px;
+            max-height: 420px;
+            overflow: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: Consolas, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            color: #eaf1ff;
+        }
+
+        .history-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 620px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px;
+            border: 1px solid #2b3240;
+            border-radius: 12px;
+            background: #11161d;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .history-item:hover {
+            background: #1a2029;
+            border-color: #42506a;
+        }
+
+        .history-content {
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        .history-text {
+            display: block;
+            font-size: 14px;
+            line-height: 1.45;
+            color: #f5f7fb;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .history-meta {
+            display: block;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #9aa4b5;
+        }
+
+        .delete-btn {
+            flex-shrink: 0;
+            background: #3a1f27;
+            border-color: #70404d;
+        }
+
+        .delete-btn:hover {
+            background: #4b2731;
+        }
+
+        @media (max-width: 1000px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 34px;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-<h1>AI Text Intelligence</h1>
+<div class="page">
+    <h1>AI Text Intelligence</h1>
 
-<div class="container">
+    <div class="container">
+        <div class="panel">
+            <div class="section">
+                <h2>Text Analysis</h2>
+                <textarea id="inputText" placeholder="Enter text..."></textarea>
 
-    <div class="left">
+                <div class="button-row" style="margin-top: 14px;">
+                    <button onclick="analyzeText()">Analyze</button>
+                </div>
+            </div>
 
-        <h2>Text Analyse</h2>
+            <div class="section">
+                <h3>Upload Text File</h3>
+                <input type="file" id="fileInput" accept=".txt">
 
-        <textarea id="inputText" rows="8" placeholder="Enter text..."></textarea>
+                <div class="button-row">
+                    <button onclick="uploadTextFile()">Upload and Analyze</button>
+                </div>
+            </div>
 
-        <br><br>
+            <div class="section" style="margin-bottom: 0;">
+                <h3>Result</h3>
+                <div class="result-box">
+                    <pre id="result">No analysis yet</pre>
+                </div>
+            </div>
+        </div>
 
-        <button onclick="analyzeText()">Analyze</button>
+        <div class="panel">
+            <h2>Analysis History</h2>
 
-        <h3>Result</h3>
+            <div class="history-controls">
+                <button onclick="loadAnalyses()">Reload History</button>
+                <button onclick="previousPage()">Previous</button>
+                <button onclick="nextPage()">Next</button>
+            </div>
 
-        <pre id="result">No analysis yet</pre>
-
+            <ul id="analysis-list" class="history-list"></ul>
+        </div>
     </div>
-
-    <div class="right">
-
-        <h2>Analyse History</h2>
-
-        <button onclick="loadAnalyses()">Reload History</button>
-
-        <br><br>
-
-        <button onclick="previousPage()">Previous</button>
-        <button onclick="nextPage()">Next</button>
-
-        <ul id="analysis-list"></ul>
-
-    </div>
-
 </div>
 
 <script>
-
     let limit = 5
     let offset = 0
 
-    async function analyzeText(){
+    function displayResult(data) {
+        const resultElement = document.getElementById("result")
 
+        if (data.analysis) {
+            resultElement.textContent = data.analysis
+            return
+        }
+
+        if (data.detail) {
+            resultElement.textContent = "Error: " + data.detail
+            return
+        }
+
+        resultElement.textContent = JSON.stringify(data, null, 2)
+    }
+
+    async function analyzeText() {
         const text = document.getElementById("inputText").value
         const resultElement = document.getElementById("result")
 
         resultElement.textContent = "Analyzing..."
 
-        try{
-
-            const response = await fetch("/analyze",{
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json"
+        try {
+            const response = await fetch("/analyze", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
                 },
-                body:JSON.stringify({text:text})
+                body: JSON.stringify({ text: text })
             })
 
             const data = await response.json()
 
-            resultElement.textContent = JSON.stringify(data,null,2)
-
-            loadAnalyses()
-
-        }catch(error){
-
-            resultElement.textContent = "Error: " + error.message
-
-        }
-
-    }
-
-    async function loadAnalyses(){
-
-        const response = await fetch(`/analyses?limit=${limit}&offset=${offset}`)
-
-        const analyses = await response.json()
-
-        const list = document.getElementById("analysis-list")
-
-        list.innerHTML = ""
-
-        analyses.forEach(item => {
-
-            const li = document.createElement("li")
-
-            const text = document.createElement("span")
-            text.textContent = item.input_text + " → " + item.analysis
-
-            const del = document.createElement("button")
-            del.textContent = "Delete"
-            del.style.marginLeft = "10px"
-
-            del.onclick = async (e) => {
-
-                e.stopPropagation()
-
-                await fetch(`/analyses/${item.id}`, {
-                    method: "DELETE"
-                })
-
-                loadAnalyses()
+            if (!response.ok) {
+                resultElement.textContent = "Error: " + (data.detail || "Analysis failed")
+                return
             }
 
-            li.appendChild(text)
-            li.appendChild(del)
+            displayResult(data)
+            loadAnalyses()
 
-            li.onclick = () => loadAnalysisDetail(item.id)
-
-            list.appendChild(li)
-
-        })
-
+        } catch (error) {
+            resultElement.textContent = "Error: " + error.message
+        }
     }
 
-    function nextPage(){
+    async function uploadTextFile() {
+        const fileInput = document.getElementById("fileInput")
+        const resultElement = document.getElementById("result")
 
+        if (!fileInput.files.length) {
+            resultElement.textContent = "Please select a .txt file first."
+            return
+        }
+
+        const file = fileInput.files[0]
+        const formData = new FormData()
+        formData.append("file", file)
+
+        resultElement.textContent = "Uploading and analyzing..."
+
+        try {
+            const response = await fetch("/upload-analyze", {
+                method: "POST",
+                body: formData
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                resultElement.textContent = "Error: " + (data.detail || "Upload failed")
+                return
+            }
+
+            displayResult(data)
+            loadAnalyses()
+
+        } catch (error) {
+            resultElement.textContent = "Error: " + error.message
+        }
+    }
+
+    async function loadAnalyses() {
+        const list = document.getElementById("analysis-list")
+
+        try {
+            const response = await fetch(`/analyses?limit=${limit}&offset=${offset}`)
+            const analyses = await response.json()
+
+            list.innerHTML = ""
+
+            analyses.forEach(item => {
+                const li = document.createElement("li")
+                li.className = "history-item"
+
+                const content = document.createElement("div")
+                content.className = "history-content"
+                content.onclick = () => loadAnalysisDetail(item.id)
+
+                const text = document.createElement("span")
+                text.className = "history-text"
+
+                const preview = item.input_text.length > 160
+                    ? item.input_text.slice(0, 160) + "..."
+                    : item.input_text
+
+                text.textContent = preview
+
+                const meta = document.createElement("span")
+                meta.className = "history-meta"
+                meta.textContent = `ID: ${item.id} • ${item.created_at}`
+
+                content.appendChild(text)
+                content.appendChild(meta)
+
+                const del = document.createElement("button")
+                del.textContent = "Delete"
+                del.className = "delete-btn"
+
+                del.onclick = async (e) => {
+                    e.stopPropagation()
+
+                    try {
+                        const response = await fetch(`/analyses/${item.id}`, {
+                            method: "DELETE"
+                        })
+
+                        if (!response.ok) {
+                            alert("Delete failed")
+                            return
+                        }
+
+                        loadAnalyses()
+                    } catch (error) {
+                        alert("Error: " + error.message)
+                    }
+                }
+
+                li.appendChild(content)
+                li.appendChild(del)
+
+                list.appendChild(li)
+            })
+
+        } catch (error) {
+            list.innerHTML = "<li class='history-item'><span class='history-text'>Error loading analyses</span></li>"
+        }
+    }
+
+    function nextPage() {
         offset += limit
         loadAnalyses()
-
     }
 
-    function previousPage(){
-
-        if(offset >= limit){
+    function previousPage() {
+        if (offset >= limit) {
             offset -= limit
         }
 
         loadAnalyses()
-
     }
 
-    async function loadAnalysisDetail(id){
-
+    async function loadAnalysisDetail(id) {
         const resultElement = document.getElementById("result")
-
         resultElement.textContent = "Loading..."
 
-        const response = await fetch(`/analyses/${id}`)
+        try {
+            const response = await fetch(`/analyses/${id}`)
+            const data = await response.json()
 
-        const data = await response.json()
+            if (!response.ok) {
+                resultElement.textContent = "Error: " + (data.detail || "Could not load analysis")
+                return
+            }
 
-        resultElement.textContent = JSON.stringify(data,null,2)
+            displayResult(data)
 
+        } catch (error) {
+            resultElement.textContent = "Error: " + error.message
+        }
     }
 
     window.onload = loadAnalyses
-
 </script>
 
 </body>
