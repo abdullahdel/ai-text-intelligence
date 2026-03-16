@@ -2,9 +2,9 @@
 
 AI Text Intelligence is a fullstack web application for AI-powered text analysis.
 
-Users can submit text through a simple web interface, the backend processes the request using the OpenAI API, stores the generated result in PostgreSQL, and provides access to previous analyses through a REST API and a history view.
+Users can either enter text manually through a web interface or upload a `.txt` file for analysis. The backend processes the text using the OpenAI API, stores the generated result in PostgreSQL, and provides access to previous analyses through a REST API and a history view.
 
-The project was built to demonstrate production-oriented backend concepts such as layered architecture, database persistence, connection pooling, structured logging, centralized error handling, request/response validation with FastAPI and Pydantic, and deployment of a fullstack application.
+The project was built to demonstrate production-oriented backend concepts such as layered architecture, database persistence, connection pooling, structured logging, centralized error handling, request/response validation with FastAPI and Pydantic, containerized local setup with Docker, and deployment of a fullstack application.
 
 ---
 
@@ -17,7 +17,8 @@ The project was built to demonstrate production-oriented backend concepts such a
 ## Features
 
 - AI-powered text analysis using the OpenAI API
-- Fullstack web application with a simple frontend interface
+- Manual text input and `.txt` file upload support
+- Fullstack web application with a custom frontend interface
 - Frontend served directly by FastAPI
 - REST API built with FastAPI
 - PostgreSQL database for persistent storage
@@ -29,6 +30,11 @@ The project was built to demonstrate production-oriented backend concepts such a
 - Clickable history view for previous analyses
 - Detail view for individual analyses
 - Delete functionality for stored analyses
+- Source metadata tracking for analyses:
+    - `manual` for text input
+    - `file` for uploaded `.txt` files
+- Improved UI with a clearer layout and scrollable result view
+- Docker support for a containerized local setup
 - Deployment on Render
 
 ---
@@ -49,8 +55,9 @@ The project was built to demonstrate production-oriented backend concepts such a
 - JavaScript
 - Fetch API
 
-### Deployment
+### Deployment / Tooling
 - Render
+- Docker
 
 ---
 
@@ -59,7 +66,7 @@ The project was built to demonstrate production-oriented backend concepts such a
 The backend follows a layered architecture:
 
 - **API layer** for request handling and endpoint definitions
-- **Service layer** for analysis logic and OpenAI integration
+- **Service layer** for analysis logic and orchestration
 - **Database layer** for persistence and retrieval
 - **PostgreSQL** as the persistent storage layer
 
@@ -72,6 +79,8 @@ The backend follows a layered architecture:
 - Structured logging
 - Centralized exception handling
 - Pagination with `limit` and `offset`
+- Separation of concerns through a service layer
+- Containerized local setup with Docker
 
 ---
 
@@ -85,6 +94,7 @@ ai-text-intelligence/
 │   ├── models/
 │   │   └── models.py
 │   ├── services/
+│   │   ├── analysis_service.py
 │   │   └── analyzer.py
 │   ├── utils/
 │   │   ├── error_handler.py
@@ -94,6 +104,7 @@ ai-text-intelligence/
 │   └── index.html
 ├── .dockerignore
 ├── .gitignore
+├── .python-version
 ├── Dockerfile
 ├── README.md
 ├── requirements.txt
@@ -113,7 +124,7 @@ Serves the frontend UI.
 
 ### `POST /analyze`
 
-Analyzes user-provided text using the OpenAI API and stores the result in the database.
+Analyzes user-provided text entered manually through the frontend.
 
 #### Request
 ```json
@@ -121,6 +132,25 @@ Analyzes user-provided text using the OpenAI API and stores the result in the da
   "text": "Your text here"
 }
 ```
+
+#### Example Response
+```json
+{
+  "analysis": "Generated analysis result"
+}
+```
+
+---
+
+### `POST /upload-analyze`
+
+Accepts a `.txt` file upload, extracts the text content, and analyzes it using the same backend analysis flow.
+
+#### Request
+Multipart form-data with a file field named `file`.
+
+#### Supported Input
+- `.txt` files only
 
 #### Example Response
 ```json
@@ -144,7 +174,7 @@ GET /analyses?limit=5&offset=0
 
 ### `GET /analyses/{id}`
 
-Returns a single analysis entry by its ID.
+Returns a single analysis entry by its ID, including source metadata.
 
 #### Example
 ```http
@@ -175,13 +205,33 @@ DELETE /analyses/1
 
 The frontend provides:
 
-- text input for submitting analyses
+- text input for manual analysis
+- `.txt` file upload for document-based analysis
 - result display area
 - analysis history list
 - clickable detail view for previous analyses
 - pagination with **Previous** and **Next**
 - delete button for removing stored analyses
 - reload button for refreshing history
+- improved layout with a dedicated result panel and history panel
+
+---
+
+## Stored Analysis Metadata
+
+Each stored analysis includes:
+
+- `input_text`
+- `analysis`
+- `source_type`
+- `source_name`
+- `created_at`
+
+### Source Types
+- `manual` → text entered directly in the textarea
+- `file` → text extracted from an uploaded `.txt` file
+
+This allows the frontend to distinguish between manual input and uploaded file analyses in the history view and detail view.
 
 ---
 
@@ -192,6 +242,16 @@ Create a `.env` file in the project root and define the following variables:
 ```env
 OPENAI_API_KEY=your_openai_api_key
 DATABASE_URL=your_postgresql_connection_string
+```
+
+---
+
+## Python Version
+
+This project is pinned to Python 3.11.11 via:
+
+```text
+.python-version
 ```
 
 ---
@@ -231,6 +291,7 @@ uvicorn app.main:app --reload
 ```text
 http://127.0.0.1:8000
 ```
+
 ---
 
 ## Docker Support
@@ -280,8 +341,11 @@ This project was built to demonstrate practical backend engineering skills, incl
 - pagination
 - delete operations
 - layered backend architecture
+- service layer refactoring
+- file upload handling for `.txt` documents
+- source metadata tracking
 - deployment of a fullstack application
-- - containerized local setup with Docker
+- containerized local setup with Docker
 
 ---
 
