@@ -369,7 +369,12 @@
 
                 const meta = document.createElement("span")
                 meta.className = "history-meta"
-                meta.textContent = `ID: ${item.id} • ${item.created_at}`
+
+                const sourceLabel = item.source_type === "file"
+                    ? `File upload: ${item.source_name || "unknown file"}`
+                    : "Manual input"
+
+                meta.textContent = `ID: ${item.id} • ${item.created_at} • ${sourceLabel}`
 
                 content.appendChild(text)
                 content.appendChild(meta)

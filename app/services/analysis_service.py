@@ -5,13 +5,13 @@ from app.utils.logger import logger
 
 
 
-def create_analysis(text):
+def create_analysis(text, source_type="manual", source_name=None):
     result = analyze_text(text)
 
     if "error" in result:
         raise HTTPException(status_code= 400, detail=result["error"])
 
-    save_analysis(text,result["analysis"])
+    save_analysis(text,result["analysis"], source_type, source_name)
     logger.info("Analysis stored in database")
 
     return result

@@ -1,5 +1,3 @@
-import psycopg2
-from dotenv import load_dotenv
 import os
 from psycopg2 import pool
 from app.utils.logger import logger
@@ -11,18 +9,32 @@ connection_pool: pool.SimpleConnectionPool | None = None
 def init_db():
     conn = None
     try:
-            conn = get_connection()
+        conn = get_connection()
 
-            with conn.cursor() as cursor:
-                logger.info("creating database table")
-                cursor.execute("""
-                               CREATE TABLE IF NOT EXISTS analyses (
-                                                                       id SERIAL PRIMARY KEY,
-                                                                       text TEXT,
-                                                                       analysis TEXT,
-                                                                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                               )
-                               """)
+        with conn.cursor() as cursor:
+            logger.info("creating database table")
+
+            cursor.execute("""
+                           CREATE TABLE IF NOT EXISTS analyses (
+                                                                   id SERIAL PRIMARY KEY,
+                                                                   text TEXT,
+                                                                   analysis TEXT,
+                                                                   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                           )
+                           """)
+
+            cursor.execute("""
+                           ALTER TABLE analyses
+                               ADD COLUMN IF NOT EXISTS source_type TEXT NOT NULL DEFAULT 'manual'
+                           """)
+
+            cursor.execute("""
+                           ALTER TABLE analyses
+                               ADD COLUMN IF NOT EXISTS source_name TEXT
+                           """)
+
+        conn.commit()
+
     finally:
         if conn:
             release_connection(conn)
@@ -45,16 +57,16 @@ def get_connection():
 def release_connection(conn):
     connection_pool.putconn(conn)
 
-def save_analysis(input_text:str, analysis:str):
+def save_analysis(input_text:str, analysis:str, source_type="manual", source_name=None):
     conn = None
     try:
             conn = get_connection()
             with conn.cursor() as cursor:
                 logger.info("Saving analysis to database")
                 cursor.execute("""
-                               INSERT INTO analyses (text, analysis)
-                               VALUES (%s, %s)
-                               """, (input_text, analysis))
+                               INSERT INTO analyses (text, analysis, source_type, source_name)
+                               VALUES (%s, %s, %s, %s)
+                               """, (input_text, analysis, source_type, source_name))
             conn.commit()
     finally:
         if conn:
@@ -68,11 +80,11 @@ def get_all_analyses(limit: int = 10, offset: int = 0):
             with conn.cursor() as cursor:
                 logger.info("Fetching analyses from database")
                 cursor.execute("""
-                               SELECT id, text, analysis, created_at
+                               SELECT id, text, analysis, source_type, source_name, created_at
                                FROM analyses
                                ORDER BY created_at DESC
                                 LIMIT %s
-                                Offset %s
+                               OFFSET %s
                                """, (limit,offset))
 
                 rows = cursor.fetchall()
@@ -87,7 +99,9 @@ def get_all_analyses(limit: int = 10, offset: int = 0):
             "id": row[0],
             "input_text": row[1],
             "analysis": row[2],
-            "created_at": row[3].isoformat()
+            "source_type": row[3],
+            "source_name": row[4],
+            "created_at": row[5].isoformat()
         })
 
     return analyses
@@ -100,7 +114,7 @@ def get_analysis_by_id(analysis_id: int):
             with conn.cursor() as cursor:
                 logger.info("query analyses by id from database")
                 cursor.execute("""
-                               SELECT id, text, analysis, created_at
+                               SELECT id, text, analysis, source_type, source_name, created_at
                                FROM analyses
                                WHERE id = %s
                                """, (analysis_id,))
@@ -117,7 +131,9 @@ def get_analysis_by_id(analysis_id: int):
         "id": row[0],
         "input_text": row[1],
         "analysis": row[2],
-        "created_at": row[3].isoformat()
+        "source_type": row[3],
+        "source_name": row[4],
+        "created_at": row[5].isoformat()
     }
 
 def delete_analysis(analysis_id: int):

@@ -51,7 +51,7 @@ def upload_analyze(file:UploadFile=File(...)):
     except UnicodeDecodeError:
         raise HTTPException(status_code=400, detail="Datei konnte nicht als UTF-8 Text gelesen werden.")
 
-    return create_analysis(text)
+    return create_analysis(text, "file", file.filename)
 
 
 @app.get("/analyses", response_model=List[AnalysisItem])

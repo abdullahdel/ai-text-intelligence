@@ -11,4 +11,6 @@ class AnalysisItem(BaseModel):
     id: int
     input_text: str
     analysis: str
+    source_type: str
+    source_name: str| None = None
     created_at: str
