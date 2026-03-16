@@ -262,6 +262,20 @@
     function displayResult(data) {
         const resultElement = document.getElementById("result")
 
+        if (data.analysis && data.input_text !== undefined) {
+            const sourceLabel = data.source_type === "file"
+                ? `File upload: ${data.source_name || "unknown file"}`
+                : "Manual input"
+
+            resultElement.textContent =
+                `Source: ${sourceLabel}\n` +
+                `Created at: ${data.created_at}\n\n` +
+                `Input:\n${data.input_text}\n\n` +
+                `Analysis:\n${data.analysis}`
+
+            return
+        }
+
         if (data.analysis) {
             resultElement.textContent = data.analysis
             return
