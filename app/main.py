@@ -1,7 +1,6 @@
 from contextlib import asynccontextmanager
 from typing import List
 
-from envs.myenv.Lib.fileinput import filename
 from fastapi import FastAPI, Query, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
