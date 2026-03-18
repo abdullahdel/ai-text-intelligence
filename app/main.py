@@ -1,9 +1,12 @@
 from contextlib import asynccontextmanager
 from typing import List
 
+from envs.myenv.Lib.fileinput import filename
 from fastapi import FastAPI, Query, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+
+from pypdf import PdfReader
 
 from app.database.database import init_db, init_pool
 from app.models.models import TestRequest, AnalysisItem, AnalysisResponse
@@ -42,14 +45,31 @@ def upload_analyze(file:UploadFile=File(...)):
     if not file.filename:
         raise HTTPException(status_code=400, detail="Keine Datei hochgeladen.")
 
-    if not file.filename.endswith(".txt"):
-        raise HTTPException(status_code=400, detail="Nur .txt-Dateien sind erlaubt.")
+    if not file.filename.lower().endswith((".txt", ".pdf")):
+        raise HTTPException(status_code=400, detail="Nur .txt- und .pdf-Dateien sind erlaubt.")
 
-    try:
-        content = file.file.read()
-        text = content.decode("utf-8")
-    except UnicodeDecodeError:
-        raise HTTPException(status_code=400, detail="Datei konnte nicht als UTF-8 Text gelesen werden.")
+    if file.filename.endswith(".txt"):
+        try:
+            content = file.file.read()
+            text = content.decode("utf-8")
+        except UnicodeDecodeError:
+            raise HTTPException(status_code=400, detail="Datei konnte nicht als UTF-8 Text gelesen werden.")
+
+    elif file.filename.endswith(".pdf"):
+        try:
+            reader = PdfReader(file.file)
+            parts = []
+
+            for page in reader.pages:
+                parts.append(page.extract_text() or "")
+
+            text = "\n".join(parts).strip()
+            if not text:
+                raise HTTPException(status_code=400, detail="PDF enthält keinen extrahierbaren Text.")
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=400, detail="PDF konnte nicht verarbeitet werden.")
 
     return create_analysis(text, "file", file.filename)
 

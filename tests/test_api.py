@@ -66,11 +66,11 @@ def test_post_upload_analyze_error(monkeypatch):
     with TestClient(main.app) as client:
         response = client.post(
             "/upload-analyze",
-            files={"file": ("notes.pdf", b"Hello from file", "text/plain")}
+            files={"file": ("notes.docx", b"Hello from file", "text/plain")}
         )
 
     assert response.status_code == 400
-    assert response.json() == {"detail": "Nur .txt-Dateien sind erlaubt."}
+    assert response.json() == {"detail": "Nur .txt- und .pdf-Dateien sind erlaubt."}
 
 def test_get_analyses_success(monkeypatch):
     fake_analyses = [
@@ -167,6 +167,40 @@ def test_delete_analysis_not_found(monkeypatch):
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Analyse nicht gefunden"}
+
+def test_post_upload_analyze_pdf_success(monkeypatch):
+    called = {}
+
+    class FakePage:
+        def extract_text(self):
+            return "Hello from pdf"
+
+    class FakePdfReader:
+        def __init__(self, file_obj):
+            self.pages = [FakePage()]
+
+    def fake_create_analysis(text, source_type="manual", source_name=None):
+        called["text"] = text
+        called["source_type"] = source_type
+        called["source_name"] = source_name
+        return {"analysis": "PDF analysis"}
+
+    monkeypatch.setattr(main, "init_pool", lambda: None)
+    monkeypatch.setattr(main, "init_db", lambda: None)
+    monkeypatch.setattr(main, "PdfReader", FakePdfReader)
+    monkeypatch.setattr(main, "create_analysis", fake_create_analysis)
+
+    with TestClient(main.app) as client:
+        response = client.post(
+            "/upload-analyze",
+            files={"file": ("document.pdf", b"fake-pdf-bytes", "application/pdf")}
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {"analysis": "PDF analysis"}
+    assert called["text"] == "Hello from pdf"
+    assert called["source_type"] == "file"
+    assert called["source_name"] == "document.pdf"
 
 
 
