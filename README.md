@@ -1,10 +1,10 @@
 # AI Text Intelligence
 
-AI Text Intelligence is a fullstack web application for AI-powered text analysis.
+AI Text Intelligence is a fullstack web application for AI-powered text and document analysis.
 
-Users can either enter text manually through a web interface or upload a `.txt` file for analysis. The backend processes the text using the OpenAI API, stores the generated result in PostgreSQL, and provides access to previous analyses through a REST API and a history view.
+Users can either enter text manually or upload `.txt` and text-based `.pdf` files for analysis. The backend processes the extracted content using the OpenAI API, stores the generated result in PostgreSQL, and provides access to previous analyses through a history and detail view.
 
-The project was built to demonstrate production-oriented backend concepts such as layered architecture, database persistence, connection pooling, structured logging, centralized error handling, request/response validation with FastAPI and Pydantic, containerized local setup with Docker, and deployment of a fullstack application.
+The project demonstrates production-oriented backend concepts such as layered architecture, database persistence, connection pooling, structured logging, centralized error handling, request/response validation with FastAPI and Pydantic, file upload handling, unit and API testing, containerized local setup with Docker, and deployment of a fullstack application.
 
 ---
 
@@ -17,7 +17,9 @@ The project was built to demonstrate production-oriented backend concepts such a
 ## Features
 
 - AI-powered text analysis using the OpenAI API
-- Manual text input and `.txt` file upload support
+- Manual text input
+- `.txt` file upload support
+- Text-based `.pdf` file upload support
 - Fullstack web application with a custom frontend interface
 - Frontend served directly by FastAPI
 - REST API built with FastAPI
@@ -31,11 +33,13 @@ The project was built to demonstrate production-oriented backend concepts such a
 - Detail view for individual analyses
 - Delete functionality for stored analyses
 - Source metadata tracking for analyses:
-    - `manual` for text input
-    - `file` for uploaded `.txt` files
+  - `manual` for text input
+  - `file` for uploaded documents
 - Improved UI with a clearer layout and scrollable result view
 - Docker support for a containerized local setup
 - Deployment on Render
+- Unit tests for the service layer
+- API tests for FastAPI endpoints
 
 ---
 
@@ -102,6 +106,9 @@ ai-text-intelligence/
 │   └── main.py
 ├── static/
 │   └── index.html
+├── tests/
+│   ├── test_analysis_service.py
+│   └── test_api.py
 ├── .dockerignore
 ├── .gitignore
 ├── .python-version
@@ -144,13 +151,14 @@ Analyzes user-provided text entered manually through the frontend.
 
 ### `POST /upload-analyze`
 
-Accepts a `.txt` file upload, extracts the text content, and analyzes it using the same backend analysis flow.
+Accepts a document upload, extracts its text content, and analyzes it using the same backend analysis flow.
+
+#### Supported Input
+- `.txt`
+- text-based `.pdf`
 
 #### Request
 Multipart form-data with a file field named `file`.
-
-#### Supported Input
-- `.txt` files only
 
 #### Example Response
 ```json
@@ -206,7 +214,7 @@ DELETE /analyses/1
 The frontend provides:
 
 - text input for manual analysis
-- `.txt` file upload for document-based analysis
+- `.txt` and `.pdf` file upload for document-based analysis
 - result display area
 - analysis history list
 - clickable detail view for previous analyses
@@ -214,6 +222,7 @@ The frontend provides:
 - delete button for removing stored analyses
 - reload button for refreshing history
 - improved layout with a dedicated result panel and history panel
+- document source display in history and detail view
 
 ---
 
@@ -229,7 +238,7 @@ Each stored analysis includes:
 
 ### Source Types
 - `manual` → text entered directly in the textarea
-- `file` → text extracted from an uploaded `.txt` file
+- `file` → text extracted from an uploaded `.txt` or `.pdf` file
 
 This allows the frontend to distinguish between manual input and uploaded file analyses in the history view and detail view.
 
@@ -318,6 +327,47 @@ http://localhost:8000
 
 ---
 
+## Testing
+
+The project includes both **unit tests** and **API tests**.
+
+### Test Coverage
+
+- **Service-layer unit tests**
+  - validate the logic in `analysis_service.py`
+  - test success and error cases
+  - use mocked dependencies instead of real OpenAI or database calls
+
+- **API tests**
+  - validate FastAPI endpoints and HTTP behavior
+  - cover request handling, status codes, responses, upload behavior, and error cases
+
+### Run tests
+
+Install test dependencies locally if needed:
+
+```bash
+pip install pytest
+```
+
+Run all tests:
+
+```bash
+python -m pytest -q
+```
+
+Run only service-layer unit tests:
+
+```bash
+python -m pytest tests/test_analysis_service.py -q
+```
+
+Run only API tests:
+
+```bash
+python -m pytest tests/test_api.py -q
+```
+
 ## Live Deployment
 
 The project is deployed on Render:
@@ -333,6 +383,7 @@ This project was built to demonstrate practical backend engineering skills, incl
 
 - API design and implementation
 - AI API integration
+- document upload handling for `.txt` and `.pdf` files
 - database persistence with PostgreSQL
 - connection pooling
 - structured logging
@@ -342,8 +393,9 @@ This project was built to demonstrate practical backend engineering skills, incl
 - delete operations
 - layered backend architecture
 - service layer refactoring
-- file upload handling for `.txt` documents
 - source metadata tracking
+- unit testing for service logic
+- API testing for FastAPI routes
 - deployment of a fullstack application
 - containerized local setup with Docker
 
