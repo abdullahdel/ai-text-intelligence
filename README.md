@@ -257,7 +257,7 @@ DATABASE_URL=your_postgresql_connection_string
 
 ## Python Version
 
-This project is pinned to Python 3.11.11 via:
+This project is pinned to Python 3.11.9 via:
 
 ```text
 .python-version
