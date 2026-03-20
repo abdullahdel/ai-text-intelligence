@@ -202,6 +202,51 @@ def test_post_upload_analyze_pdf_success(monkeypatch):
     assert called["source_type"] == "file"
     assert called["source_name"] == "document.pdf"
 
+def test_post_ask_about_analysis_success(monkeypatch):
+    def fake_ask_question_about_analysis(analysis_id, question):
+        assert analysis_id == 7
+        assert question == "What is this document about?"
+        return {
+            "analysis_id": 7,
+            "question": "What is this document about?",
+            "answer": "It is about API design and testing."
+        }
+
+    monkeypatch.setattr(main, "init_pool", lambda: None)
+    monkeypatch.setattr(main, "init_db", lambda: None)
+    monkeypatch.setattr(main, "ask_question_about_analysis", fake_ask_question_about_analysis)
+
+    with TestClient(main.app) as client:
+        response = client.post(
+            "/analyses/7/ask",
+            json={"question": "What is this document about?"}
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "analysis_id": 7,
+        "question": "What is this document about?",
+        "answer": "It is about API design and testing."
+    }
+
+
+def test_post_ask_about_analysis_not_found(monkeypatch):
+    def fake_ask_question_about_analysis(analysis_id, question):
+        raise HTTPException(status_code=404, detail="Analyse nicht gefunden")
+
+    monkeypatch.setattr(main, "init_pool", lambda: None)
+    monkeypatch.setattr(main, "init_db", lambda: None)
+    monkeypatch.setattr(main, "ask_question_about_analysis", fake_ask_question_about_analysis)
+
+    with TestClient(main.app) as client:
+        response = client.post(
+            "/analyses/999/ask",
+            json={"question": "What is this document about?"}
+        )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Analyse nicht gefunden"}
+
 
 
 

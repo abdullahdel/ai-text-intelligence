@@ -153,3 +153,47 @@ def test_delete_analysis_by_id_not_found(monkeypatch):
 
     assert exc_info.value.status_code == 404
     assert exc_info.value.detail == "Analyse nicht gefunden"
+
+def test_ask_question_about_analysis_success(monkeypatch):
+    fake_analysis = {
+        "id": 7,
+        "input_text": "This document is about API design and testing.",
+        "analysis": "Old analysis",
+        "source_type": "file",
+        "source_name": "notes.txt",
+        "created_at": "2026-03-16T12:10:00",
+    }
+
+    def fake_get_analysis_by_id(analysis_id):
+        return fake_analysis
+
+    def fake_answer_question_with_context(question, context):
+        assert question == "What is this document about?"
+        assert context == "This document is about API design and testing."
+        return {"answer": "It is about API design and testing."}
+
+    monkeypatch.setattr(analysis_service, "get_analysis_by_id", fake_get_analysis_by_id)
+    monkeypatch.setattr(analysis_service, "answer_question_with_context", fake_answer_question_with_context)
+
+    result = analysis_service.ask_question_about_analysis(
+        7,
+        "What is this document about?"
+    )
+
+    assert result == {
+        "analysis_id": 7,
+        "question": "What is this document about?",
+        "answer": "It is about API design and testing."
+    }
+
+def test_ask_question_about_analysis_not_found(monkeypatch):
+    def fake_get_analysis_by_id(analysis_id):
+        return None
+
+    monkeypatch.setattr(analysis_service, "get_analysis_by_id", fake_get_analysis_by_id)
+
+    with pytest.raises(HTTPException) as exc_info:
+        analysis_service.ask_question_about_analysis(999, "Any question")
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Analyse nicht gefunden"

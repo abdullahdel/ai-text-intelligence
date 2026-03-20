@@ -196,6 +196,28 @@
             background: #4b2731;
         }
 
+        #selected-analysis-info {
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #9aa4b5;
+        }
+
+        #question-input {
+            min-height: 110px;
+        }
+
+        #question-answer-box {
+            margin-top: 16px;
+            padding: 14px;
+            border: 1px solid #2b3240;
+            border-radius: 12px;
+            background: #11161d;
+            min-height: 60px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
         @media (max-width: 1000px) {
             .container {
                 grid-template-columns: 1fr;
@@ -209,7 +231,6 @@
 </head>
 
 <body>
-
 <div class="page">
     <h1>AI Text Intelligence</h1>
 
@@ -233,11 +254,27 @@
                 </div>
             </div>
 
-            <div class="section" style="margin-bottom: 0;">
+            <div class="section">
                 <h3>Result</h3>
                 <div class="result-box">
                     <pre id="result">No analysis yet</pre>
                 </div>
+            </div>
+
+            <div class="section" style="margin-bottom: 0;">
+                <h3>Ask a Question About This Analysis</h3>
+                <p id="selected-analysis-info">No analysis selected yet.</p>
+
+                <textarea
+                        id="question-input"
+                        placeholder="Enter your question about the selected document..."
+                ></textarea>
+
+                <div class="button-row" style="margin-top: 14px;">
+                    <button onclick="askQuestionAboutAnalysis()">Ask Question</button>
+                </div>
+
+                <div id="question-answer-box">No answer yet.</div>
             </div>
         </div>
 
@@ -256,44 +293,51 @@
 </div>
 
 <script>
-    let limit = 5
-    let offset = 0
+    let limit = 5;
+    let offset = 0;
+    let currentAnalysisId = null;
+
+    function setCurrentAnalysisId(id) {
+        currentAnalysisId = id;
+        document.getElementById("selected-analysis-info").textContent =
+            `Selected analysis ID: ${id}`;
+    }
 
     function displayResult(data) {
-        const resultElement = document.getElementById("result")
+        const resultElement = document.getElementById("result");
 
         if (data.analysis && data.input_text !== undefined) {
             const sourceLabel = data.source_type === "file"
                 ? `File upload: ${data.source_name || "unknown file"}`
-                : "Manual input"
+                : "Manual input";
 
             resultElement.textContent =
                 `Source: ${sourceLabel}\n` +
                 `Created at: ${data.created_at}\n\n` +
                 `Input:\n${data.input_text}\n\n` +
-                `Analysis:\n${data.analysis}`
+                `Analysis:\n${data.analysis}`;
 
-            return
+            return;
         }
 
         if (data.analysis) {
-            resultElement.textContent = data.analysis
-            return
+            resultElement.textContent = data.analysis;
+            return;
         }
 
         if (data.detail) {
-            resultElement.textContent = "Error: " + data.detail
-            return
+            resultElement.textContent = "Error: " + data.detail;
+            return;
         }
 
-        resultElement.textContent = JSON.stringify(data, null, 2)
+        resultElement.textContent = JSON.stringify(data, null, 2);
     }
 
     async function analyzeText() {
-        const text = document.getElementById("inputText").value
-        const resultElement = document.getElementById("result")
+        const text = document.getElementById("inputText").value;
+        const resultElement = document.getElementById("result");
 
-        resultElement.textContent = "Analyzing..."
+        resultElement.textContent = "Analyzing...";
 
         try {
             const response = await fetch("/analyze", {
@@ -302,166 +346,212 @@
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({ text: text })
-            })
+            });
 
-            const data = await response.json()
+            const data = await response.json();
 
             if (!response.ok) {
-                resultElement.textContent = "Error: " + (data.detail || "Analysis failed")
-                return
+                resultElement.textContent = "Error: " + (data.detail || "Analysis failed");
+                return;
             }
 
-            displayResult(data)
-            loadAnalyses()
-
+            displayResult(data);
+            loadAnalyses();
         } catch (error) {
-            resultElement.textContent = "Error: " + error.message
+            resultElement.textContent = "Error: " + error.message;
         }
     }
 
     async function uploadTextFile() {
-        const fileInput = document.getElementById("fileInput")
-        const resultElement = document.getElementById("result")
+        const fileInput = document.getElementById("fileInput");
+        const resultElement = document.getElementById("result");
 
         if (!fileInput.files.length) {
-            resultElement.textContent = "Please select a .txt file first."
-            return
+            resultElement.textContent = "Please select a .txt or .pdf file first.";
+            return;
         }
 
-        const file = fileInput.files[0]
-        const formData = new FormData()
-        formData.append("file", file)
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append("file", file);
 
-        resultElement.textContent = "Uploading and analyzing..."
+        resultElement.textContent = "Uploading and analyzing...";
 
         try {
             const response = await fetch("/upload-analyze", {
                 method: "POST",
                 body: formData
-            })
+            });
 
-            const data = await response.json()
+            const data = await response.json();
 
             if (!response.ok) {
-                resultElement.textContent = "Error: " + (data.detail || "Upload failed")
-                return
+                resultElement.textContent = "Error: " + (data.detail || "Upload failed");
+                return;
             }
 
-            displayResult(data)
-            loadAnalyses()
-
+            displayResult(data);
+            loadAnalyses();
         } catch (error) {
-            resultElement.textContent = "Error: " + error.message
+            resultElement.textContent = "Error: " + error.message;
         }
     }
 
     async function loadAnalyses() {
-        const list = document.getElementById("analysis-list")
+        const list = document.getElementById("analysis-list");
 
         try {
-            const response = await fetch(`/analyses?limit=${limit}&offset=${offset}`)
-            const analyses = await response.json()
+            const response = await fetch(`/analyses?limit=${limit}&offset=${offset}`);
+            const analyses = await response.json();
 
-            list.innerHTML = ""
+            list.innerHTML = "";
 
             analyses.forEach(item => {
-                const li = document.createElement("li")
-                li.className = "history-item"
+                const li = document.createElement("li");
+                li.className = "history-item";
 
-                const content = document.createElement("div")
-                content.className = "history-content"
-                content.onclick = () => loadAnalysisDetail(item.id)
+                const content = document.createElement("div");
+                content.className = "history-content";
+                content.onclick = () => loadAnalysisDetail(item.id);
 
-                const text = document.createElement("span")
-                text.className = "history-text"
+                const text = document.createElement("span");
+                text.className = "history-text";
 
                 const preview = item.input_text.length > 160
                     ? item.input_text.slice(0, 160) + "..."
-                    : item.input_text
+                    : item.input_text;
 
-                text.textContent = preview
+                text.textContent = preview;
 
-                const meta = document.createElement("span")
-                meta.className = "history-meta"
+                const meta = document.createElement("span");
+                meta.className = "history-meta";
 
                 const sourceLabel = item.source_type === "file"
                     ? `File upload: ${item.source_name || "unknown file"}`
-                    : "Manual input"
+                    : "Manual input";
 
-                meta.textContent = `ID: ${item.id} • ${item.created_at} • ${sourceLabel}`
+                meta.textContent = `ID: ${item.id} • ${item.created_at} • ${sourceLabel}`;
 
-                content.appendChild(text)
-                content.appendChild(meta)
+                content.appendChild(text);
+                content.appendChild(meta);
 
-                const del = document.createElement("button")
-                del.textContent = "Delete"
-                del.className = "delete-btn"
+                const del = document.createElement("button");
+                del.textContent = "Delete";
+                del.className = "delete-btn";
 
                 del.onclick = async (e) => {
-                    e.stopPropagation()
+                    e.stopPropagation();
 
                     try {
                         const response = await fetch(`/analyses/${item.id}`, {
                             method: "DELETE"
-                        })
+                        });
 
                         if (!response.ok) {
-                            alert("Delete failed")
-                            return
+                            alert("Delete failed");
+                            return;
                         }
 
-                        loadAnalyses()
+                        if (currentAnalysisId === item.id) {
+                            currentAnalysisId = null;
+                            document.getElementById("selected-analysis-info").textContent =
+                                "No analysis selected yet.";
+                            document.getElementById("question-answer-box").textContent =
+                                "No answer yet.";
+                        }
+
+                        loadAnalyses();
                     } catch (error) {
-                        alert("Error: " + error.message)
+                        alert("Error: " + error.message);
                     }
-                }
+                };
 
-                li.appendChild(content)
-                li.appendChild(del)
+                li.appendChild(content);
+                li.appendChild(del);
 
-                list.appendChild(li)
-            })
-
+                list.appendChild(li);
+            });
         } catch (error) {
-            list.innerHTML = "<li class='history-item'><span class='history-text'>Error loading analyses</span></li>"
+            list.innerHTML = "<li class='history-item'><span class='history-text'>Error loading analyses</span></li>";
         }
     }
 
     function nextPage() {
-        offset += limit
-        loadAnalyses()
+        offset += limit;
+        loadAnalyses();
     }
 
     function previousPage() {
         if (offset >= limit) {
-            offset -= limit
+            offset -= limit;
         }
 
-        loadAnalyses()
+        loadAnalyses();
     }
 
     async function loadAnalysisDetail(id) {
-        const resultElement = document.getElementById("result")
-        resultElement.textContent = "Loading..."
+        const resultElement = document.getElementById("result");
+        resultElement.textContent = "Loading...";
 
         try {
-            const response = await fetch(`/analyses/${id}`)
-            const data = await response.json()
+            const response = await fetch(`/analyses/${id}`);
+            const data = await response.json();
 
             if (!response.ok) {
-                resultElement.textContent = "Error: " + (data.detail || "Could not load analysis")
-                return
+                resultElement.textContent = "Error: " + (data.detail || "Could not load analysis");
+                return;
             }
 
-            displayResult(data)
-
+            setCurrentAnalysisId(data.id);
+            displayResult(data);
         } catch (error) {
-            resultElement.textContent = "Error: " + error.message
+            resultElement.textContent = "Error: " + error.message;
         }
     }
 
-    window.onload = loadAnalyses
-</script>
+    async function askQuestionAboutAnalysis() {
+        const questionInput = document.getElementById("question-input");
+        const answerBox = document.getElementById("question-answer-box");
 
+        const question = questionInput.value.trim();
+
+        if (!currentAnalysisId) {
+            answerBox.textContent = "Please select an analysis first.";
+            return;
+        }
+
+        if (!question) {
+            answerBox.textContent = "Please enter a question.";
+            return;
+        }
+
+        answerBox.textContent = "Loading answer...";
+
+        try {
+            const response = await fetch(`/analyses/${currentAnalysisId}/ask`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ question: question })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                answerBox.textContent = "Error: " + (data.detail || "Something went wrong.");
+                return;
+            }
+
+            answerBox.textContent =
+                `Question: ${data.question}\n\n` +
+                `Answer:\n${data.answer}`;
+        } catch (error) {
+            answerBox.textContent = "Error: Failed to fetch answer.";
+        }
+    }
+
+    window.onload = loadAnalyses;
+</script>
 </body>
 </html>

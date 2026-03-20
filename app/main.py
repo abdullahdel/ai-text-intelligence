@@ -8,12 +8,12 @@ from fastapi.staticfiles import StaticFiles
 from pypdf import PdfReader
 
 from app.database.database import init_db, init_pool
-from app.models.models import TestRequest, AnalysisItem, AnalysisResponse
+from app.models.models import TestRequest, AnalysisItem, AnalysisResponse, QuestionRequest, QuestionAnswerResponse
 from app.services.analysis_service import (
     create_analysis,
     list_analyses,
     get_analysis as get_analysis_service,
-    delete_analysis_by_id,
+    delete_analysis_by_id, ask_question_about_analysis,
 )
 from app.utils.error_handler import global_exception_handler
 from app.utils.logger import logger
@@ -99,3 +99,7 @@ def serve_index():
     logger.info("Serving frontend UI")
     return FileResponse("static/index.html")
 
+
+@app.post("/analyses/{analysis_id}/ask", response_model=QuestionAnswerResponse)
+def ask_about_analysis(analysis_id: int, request: QuestionRequest):
+    return ask_question_about_analysis(analysis_id, request.question)

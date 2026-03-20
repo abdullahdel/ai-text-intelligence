@@ -14,3 +14,11 @@ class AnalysisItem(BaseModel):
     source_type: str
     source_name: str| None = None
     created_at: str
+
+class QuestionRequest(BaseModel):
+    question: str
+
+class QuestionAnswerResponse(BaseModel):
+    analysis_id: int
+    question: str
+    answer: str
